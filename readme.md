@@ -4,7 +4,7 @@ Es una aplicación web utilizando la tecnología flask y una serie de vídeo tut
 
 Mira los vídeos aquí: https://youtube.com/playlist?list=PL34SnF8_dK3dLMtxrfpRzXVM0YST7Q3fT&si=RmS8Bcb_JXfX7PID
 
-Pruebalo online desde este enlace: https://platform-video.onrender.com
+Pruebalo online desde este enlace: https://platform-video.onrender.com/
 
 <img src="docs/readme.png" width="600px">
 
