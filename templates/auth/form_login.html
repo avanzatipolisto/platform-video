@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %} Login{% endblock %}
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-6 mx-auto p-5">
+                <h5 class="text-center">Login</h5>
+                <form action="/login" method="POST">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" name="name" class="form-control mb-2" required>
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control mb-2" required>
+                    <button type="submit" class="form-control btn btn-primary mb-2"> Login </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

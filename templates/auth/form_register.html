@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %} Register{% endblock %}
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-6 mx-auto p-5">
+                <h5 class="text-center">Register</h5>
+                <form action="/register" method="POST">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" name="name" class="form-control mb-2" required >
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control mb-2" required >
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control mb-2" required>   
+                    <label for="password_repeat" class="form-label">Password repeat</label>                
+                    <input type="password" name="password_repeat" class="form-control mb-2" required>
+                    <label for="birddate" class="form-label">birddate</label>    
+                    <input type="date" name="birddate" class="form-control mb-2" required>
+                    <button type="submit" class="form-control btn btn-primary mb-2">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
