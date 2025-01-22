@@ -172,17 +172,15 @@ class SqliteClient:
         self.connection.commit()
 
     def create_table_users_contents(self):
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS user_content (
-            id INTEGER PRIMARY KEY AUTO
-                            
-                            INCREMENT,
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS users_contents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             content_id INTEGER
         );''')
         self.connection.commit()
 
     def add_fake_users_contents(self):
-        self.cursor.executemany("insert into user_content (`user_id`, `content_id`)values (?,?);",
+        self.cursor.executemany("insert into users_contents (`user_id`, `content_id`)values (?,?);",
                                     [
                                         (2, 3), 
                                         (2, 4)
