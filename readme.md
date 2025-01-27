@@ -6,6 +6,8 @@ Mira los vídeos aquí: https://youtube.com/playlist?list=PL34SnF8_dK3dLMtxrfpRz
 
 Pruebalo online desde este enlace: https://platform-video.onrender.com/
 
+El usuario es juan, el administrador es adm y las contraseñas son 1234
+
 <img src="docs/readme.png" width="600px">
 
 
