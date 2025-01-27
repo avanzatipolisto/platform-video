@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %} user favorite series {% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center text-center">
+        <h5>user favorite series</h5>
+        {% for serie in series %}
+            <div class="col m-2">
+                <!-- Los cards de boostrap: https://getbootstrap.com/docs/5.0/components/card/ -->
+                <div class="card" style="width: 8rem;">
+                    <a href="/show/{{serie[0]}}">
+                        <img class="card-img-top" src="{{ url_for('static', filename=serie[8]) }}" alt="{{ serie[6] }}" />
+                        <p class="card-text fw-bold">{{ serie[6] }}</p>
+                    </a>
+                    {% set delete_to_serie=serie[2] %}
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal{{delete_to_serie}}">
+                        Delete
+                    </button>
+                </div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal{{delete_to_serie}}" tabindex="-1" aria-labelledby="exampleModalLabel{{delete_to_serie}}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel{{delete_to_serie}}">Delete content</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="text" value="¿Está seguro que desea borrarlo? " class="form-control" disabled>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                                <form action="/users/favorite_series_delete" method="post">
+                                    <input type="hidden" name="content_id" value="{{delete_to_serie}}">
+                                    <button type="submit" class="btn btn-danger">Si</button> 
+                                </form>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

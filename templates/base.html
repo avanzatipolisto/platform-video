@@ -35,7 +35,7 @@
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                {% if "nombre" in session %}
+                {% if "name" in session %}
                 <li class="nav-item"><a href='/logout' class="nav-link"><i class="bi bi-box-arrow-in-right"> Logout</i></a></li>
                 {% else %}
                     <li class="nav-item"><a href='/form_register' class="nav-link"><i class="bi bi-person-add"> Register</i></a></li>
@@ -50,11 +50,13 @@
             </div>
         </div>
     </nav>
-    <!-- Según la sión mostraremos el menú del usuario o del administrador -->
-    {% if "nombre" in session %}
+    <!-- Según el rol mostraremos el menú del usuario o del administrador -->
+    {% if "name" in session %}
         <div class="container-fluid mx-5">
-            {% if session["rol"] == "administrador" %}
-            <p><a href="/menu_admin" class="text-decoration-none">Menu administrador: {{session["nombre"]}}</a></p>
+            {% if session["rol"] == "admin" %}
+                {% include "includes/admin_navbar.html" %}
+            {% elif  session["rol"] == "normal"%}
+                {% include "includes/user_navbar.html" %}
             {% endif %}
         </div>
     {% endif %}

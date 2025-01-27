@@ -46,9 +46,9 @@ class SqliteClient:
     def add_fake_users(self):
         self.cursor.executemany("insert into users (`name`, `password`, 'email', `birddate`, `rol`)values (?,?,?,?,?);",
             [
-                ('admin','1234', 'admin@loretix.com', '1998-03-27', '1'),
-                ('Kalo','1234', 'kaloy@gmail.com', '1998-03-27', '0'),
-                ('juan','1234', 'juan@gmail.com', '1977-12-12', '0')
+                ('admin','1234', 'admin@loretix.com', '1998-03-27', 'admin'),
+                ('kalo','1234', 'kaloy@gmail.com', '1998-03-27', 'normal'),
+                ('juan','1234', 'juan@gmail.com', '1977-12-12', 'normal')
             ]
         )  
         self.connection.commit()
@@ -59,7 +59,7 @@ class SqliteClient:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     type varchar(20),
                     genre varchar(20),
-                    ti8le varchar(255),
+                    title varchar(255),
                     year integer,
                     image varchar(255),
                     clicks integer
@@ -68,7 +68,7 @@ class SqliteClient:
         self.connection.commit()
 
     def add_fake_contents(self):
-        self.cursor.executemany("insert into contents (`type`, `genre`, `ti8le`, `year`, `image`, `clicks`)values (?,?,?,?,?,?);",
+        self.cursor.executemany("insert into contents (`type`, `genre`, `title`, `year`, `image`, `clicks`)values (?,?,?,?,?,?);",
             [        
                 ('pelicula','Acción','Mad Max: Furia en la carretera','2015','Peliculas/accion_1.jpg','0'),
                 ('pelicula','Comedia','La jungla de cristal','1988','Peliculas/accion_2.jpg','4'),
