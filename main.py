@@ -743,6 +743,6 @@ def favorite_film_delete():
 
 # es posible arranca la aplicación esccribiendo en el terminal flask --app main run y comentando las 2 siguiente sentencias
 if __name__=="__main__":
-    app.run(debug=True)
+    #app.run(debug=True)
     #para render.com
-    #app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0", debug=False)
