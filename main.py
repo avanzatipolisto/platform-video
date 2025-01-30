@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, make_response, redirect, url_for, flash, session
+from flask import Flask, render_template, request, make_response, redirect, url_for, flash, session,jsonify
 from utils.utils import *
 from data.sqliteClient import SqliteClient
 from data.sqliteUsers import SqliteUsers
@@ -6,6 +6,8 @@ from data.sqliteContents import SqliteContents
 from data.sqliteUsersContents import SqliteUsersContents
 from math import floor
 from utils.file_manager import *
+from flasgger import Swagger
+
 #Utilizamos el os en el delete content
 import os
 database=SqliteClient()
@@ -13,11 +15,14 @@ sqlite_users=SqliteUsers(database)
 sqlite_contents=SqliteContents(database)
 sqlite_users_contents=SqliteUsersContents(database)
 app = Flask(__name__)
+#Documentación
+swagger = Swagger(app)
 app.secret_key="My secret Key"
 FILMS_IMAGES_FOLDER = "static/films"
 app.config["FILMS_IMAGES_FOLDER"] = FILMS_IMAGES_FOLDER
 SERIES_IMAGES_FOLDER = "static/series"
 app.config["SERIES_IMAGES_FOLDER"] = SERIES_IMAGES_FOLDER
+
 
 
 @app.before_request
@@ -32,15 +37,45 @@ def after_request_func(response):
 @app.route("/")
 @app.route("/<page_films>/<page_series>")
 def home(page_films=0, page_series=0):
+    """
+    Ver las peículas y series con más clicks
+    ---    
+    parameters:
+      - name: page_films
+        in: path
+        type: string
+        default: 0
+      - name: page_series
+        in: path
+        type: string
+        default: 0
+    responses:
+      200:
+        description: home.html
+    """
+
     page_films=int(page_films)
     page_series=int(page_series)
     films=sqlite_contents.get_all_films_order_by_clicks(page_films*4)
     series=sqlite_contents.get_all_series_order_by_clicks(page_series*4)
     return render_template("home.html", films=films, series=series, page_films=page_films, page_series=page_series)
 
-
 @app.route("/show/<id>")
 def show(id):
+    """
+    Ver ficha de una película
+    ---    
+    parameters:
+      - name: id
+        in: path
+        type: string
+        required: true
+        default: 0
+
+    responses:
+      200:
+        description: show.html
+    """
     contents=sqlite_contents.get_content_by_field("id", id)
     content=contents[0]
     return render_template("show.html", content=content)
@@ -708,6 +743,6 @@ def favorite_film_delete():
 
 # es posible arranca la aplicación esccribiendo en el terminal flask --app main run y comentando las 2 siguiente sentencias
 if __name__=="__main__":
-    #app.run(debug=True)
+    app.run(debug=True)
     #para render.com
-    app.run(host="0.0.0.0", debug=False)
+    #app.run(host="0.0.0.0", debug=False)
