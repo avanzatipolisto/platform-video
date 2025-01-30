@@ -5,36 +5,22 @@ class SqliteUsersContents:
         self.sqliteClient=database
     def get_user_content_by_field(self, field, value):
         print ("pasado el valor ", field, value)
-        self.sqliteClient.cursor.execute(f"SELECT * FROM users_contents WHERE {field}={value}")
+        self.sqliteClient.cursor.execute(f"SELECT * FROM users_contents WHERE {field}='{value}'")
         tupla=self.sqliteClient.cursor.fetchall()
         return tupla
-    def get_all_users_contents(self):
-        self.sqliteClient.cursor.execute("SELECT * FROM users_contents")
+    def get_all_users_contents(self, page):
+        self.sqliteClient.cursor.execute("SELECT * FROM users_contents LIMIT ?, 10", (page,))  
         return self.sqliteClient.cursor.fetchall()
-    """
-    users_contents
-    ---------------
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    content_id INTEGER
-
-    contents
-    ---------
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type varchar(20),
-    genre varchar(20),
-    title varchar(255),
-    year integer,
-    image varchar(255),
-    clicks integer
-    
-    """
+    def get_count_users_contents(self)->int:
+        self.sqliteClient.cursor.execute("SELECT count(*) FROM users_contents")      
+        count=self.sqliteClient.cursor.fetchall()[0][0]
+        return count
     def get_user_favorite_films(self, user_id):
         self.sqliteClient.cursor.execute(f"""
                                         select uc.id, uc.user_id, uc.content_id, co.id, co.type, co.genre, co.title, co.year, co.image, co.clicks
                                         from contents co 
                                         inner join users_contents uc on co.id=uc.content_id
-                                        where co.type ='pelicula'
+                                        where co.type ='film'
                                         and uc.user_id={user_id}
                                          """)
         return self.sqliteClient.cursor.fetchall()

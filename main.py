@@ -5,12 +5,20 @@ from data.sqliteUsers import SqliteUsers
 from data.sqliteContents import SqliteContents
 from data.sqliteUsersContents import SqliteUsersContents
 from math import floor
+from utils.file_manager import *
+#Utilizamos el os en el delete content
+import os
 database=SqliteClient()
 sqlite_users=SqliteUsers(database)
 sqlite_contents=SqliteContents(database)
 sqlite_users_contents=SqliteUsersContents(database)
 app = Flask(__name__)
 app.secret_key="My secret Key"
+FILMS_IMAGES_FOLDER = "static/films"
+app.config["FILMS_IMAGES_FOLDER"] = FILMS_IMAGES_FOLDER
+SERIES_IMAGES_FOLDER = "static/series"
+app.config["SERIES_IMAGES_FOLDER"] = SERIES_IMAGES_FOLDER
+
 
 @app.before_request
 def before_request_func():
@@ -33,7 +41,8 @@ def home(page_films=0, page_series=0):
 
 @app.route("/show/<id>")
 def show(id):
-    content=sqlite_contents.get_content_by_field("id", id)
+    contents=sqlite_contents.get_content_by_field("id", id)
+    content=contents[0]
     return render_template("show.html", content=content)
 @app.route("/show_content", methods = ["POST", "GET"])
 def show_user_content():
@@ -41,7 +50,8 @@ def show_user_content():
         id=request.args.get("id")
     elif request.method=="POST":
         id=request.form.get("id")
-    content=sqlite_contents.get_content_by_field("id", id)
+    contents=sqlite_contents.get_content_by_field("id", id)
+    content=contents[0]
     return render_template("show.html", content=content)
 
 
@@ -241,30 +251,55 @@ def menu_admin():
 #####################################################################
 #####################################################################
 
+@app.route("/admin/settings/form_reset")
+def admin_form_reset_all():
+    return render_template("admin/settings.html")
+
+@app.route("/admin/settings/reset")
+def admin_reset_all():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+
+    
+    delete_folder(app.config["FILMS_IMAGES_FOLDER"])
+    delete_folder(app.config["SERIES_IMAGES_FOLDER"])
+    copy_assets("assets", "static")
+    database.close()
+    delete_file("database.db")
+    database.connect()
+    database.close()
+    return redirect(url_for("home")) 
+
+ 
 #                          USERS
 #####################################################################    
 @app.route("/admin/users/showAll")
-def show_all_user_admin():
+@app.route("/admin/users/showAll/<page>")
+def show_all_user_admin(page=0):
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
-    users=sqlite_users.get_all_users()
-    return render_template("admin/users/showAll.html",users=users)
+            return redirect("/form_login")
+    page=int(page)
+    users=sqlite_users.get_all_users(page*10)
+    total_pages=sqlite_users.get_count_users()
+    last_page=floor(total_pages/10)
+    return render_template("admin/users/showAll.html",users=users, page=page, last_page=last_page)
 
 @app.route("/admin/users/form_create")
 def admin_form_create_user():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     return render_template("admin/users/form_create.html")
 
 @app.route("/admin/users/create", methods=["POST"])
 def admin_create_user():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     if request.method!="POST":
-        return redirect("/login")
+        return redirect("/form_login")
     else:
         #Obtenemos los datos
         name = request.form.get("name")
@@ -287,7 +322,7 @@ def admin_create_user():
 def admin_form_update_user():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     if (request.method == "GET"):
         id= request.args.get("id")
     elif (request.method == "POST"):
@@ -302,10 +337,10 @@ def admin_form_update_user():
 def admin_update_user():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
 
     if request.method!="POST":
-        return redirect("/login")
+        return redirect("/form_login")
     else:
         #Obtenemos los datos
         id = request.form.get("id")
@@ -334,7 +369,7 @@ def admin_update_user():
 def admin_delete_user():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     id= request.form.get("id")
     print("El id a borrar es ",id)
     sqlite_users.delete_user(id)
@@ -344,26 +379,137 @@ def admin_delete_user():
 #                          Contents
 #####################################################################    
 @app.route("/admin/contents/showAll")
-def show_all_contents_admin():
+@app.route("/admin/contents/showAll/<page>")
+def show_all_contents_admin(page=0):
+    page=int(page)
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
-    contents=sqlite_contents.get_all_contents()
-    return render_template("admin/contents/showAll.html",contents=contents)
+            return redirect("/form_login")
+
+    contents=sqlite_contents.get_all_contents(page*10)
+    total_pages=sqlite_contents.get_count_contents()
+    last_page=floor(total_pages/10)
+    return render_template("admin/contents/showAll.html",contents=contents, page=page, last_page=last_page)
 
 @app.route("/admin/contents/form_create")
 def admin_form_create_content():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     return render_template("admin/contents/form_create.html")
+
+@app.route("/admin/contents/create", methods=["POST"])
+def admin_create_content():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+    if request.method!="POST":
+        return redirect("/form_login")
+    else:
+        #Obtenemos los datos
+        type = request.form.get("type")
+        genre = request.form.get("genre")
+        title = request.form.get("title")
+        year = request.form.get("year")
+        clicks=0
+        image=request.files["image"] 
+        file_name=image.filename
+        extension=file_name.split(".")[-1]
+        
+        #validaciones
+        if (extension != "png") and (extension != "jpg") and (extension != "jpeg"):
+            flash("The file must be of type png, jpg or jpeg")
+            return redirect(url_for("admin_form_create_content"))
+        if (image==None):
+            flash("The file cannot be empty")
+            return redirect(url_for("admin_form_create_content"))
+        if check_empty(type) or check_empty(genre) or check_empty(title) or check_empty(year):
+            flash("There can be no empty fields")
+            return redirect(url_for("admin_form_create_content"))
+        # Comprobamos si ya existe ese título en la base de datos
+        contents=sqlite_contents.get_content_by_field("title", title)
+        if (len(contents)>0):
+                flash("The content already exists")
+                return redirect(url_for("admin_form_create_content"))
+        if (type=="film"):
+            image.save("static/films/"+file_name) 
+            sqlite_contents.add_content(type,genre,title,year,"films/"+title+"."+extension,clicks)
+        else:
+            image.save("static/series/"+file_name)
+            sqlite_contents.add_content(type,genre,title,year,"series/"+title+"."+extension,clicks)
+        return redirect(url_for("show_all_contents_admin"))
+
+@app.route("/admin/contents/form_update", methods=["POST", "GET"])
+def admin_form_update_content():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+    #if (request.method == "GET"):
+    #    id= request.args.get("id")
+    if (request.method == "POST"):
+        id =request.form.get("id")
+    print("El id es ",id)
+    contents=sqlite_contents.get_content_by_field("id",id)
+    content=contents[0]
+    print ("El contenido es ", content)
+    return render_template("admin/contents/form_update.html",content=content)
+
+@app.route("/admin/contents/update", methods=["POST"])
+def admin_update_content():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+
+    if request.method!="POST":
+        return redirect("/form_login")
+    else:
+        #Obtenemos los datos
+        id = request.form.get("id")
+        type = request.form.get("type")
+        genre = request.form.get("genre")
+        title = request.form.get("title")
+        year = request.form.get("year")
+        clicks = request.form.get("clicks")
+        image=request.files["image"] 
+        print("la lista de imagenes es ",image)
+        path_image=request.form.get("path_image")
+        #validaciones
+        #Si la imiagen no es nula es que has pichado en el input file y has elegido una imagen
+        if image.filename != "": 
+            file_name=image.filename
+            extension=file_name.split(".")[-1]
+            if ( extension!= "png") and (extension != "jpg") and (extension != "jpeg"):
+                flash("El archivo debe ser de tipo png, jpg o jpeg")
+                return redirect(url_for("admin_form_create_content"))        
+            if(type=="film"):
+                image.save("static/films/"+title+"."+extension) 
+                path_image="films/"+title+"."+extension
+            elif(type=="serie"):
+                image.save("static/series/"+title+"."+extension) 
+                path_image="series/"+title+"."+extension
+        
+        if check_empty(type) or check_empty(genre) or check_empty(title) or check_empty(year):
+            flash("There can be no empty fields")
+            contents=sqlite_contents.get_content_by_field("id",id)
+            content=contents[0]
+            return render_template("admin/contents/form_update.html",content=content)
+       
+        sqlite_contents.update_content(id,type,genre,title,year,path_image,clicks)
+        return redirect(url_for("show_all_contents_admin"))
+
 @app.route("/admin/contents/delete", methods=["post"])
 def admin_delete_content():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     id= request.form.get("id")
-    sqlite_users_contents.delete_user_content(id)
+    #borramos la imagen
+    content=sqlite_contents.get_content_by_field("id",id)
+    content=content[0]
+    if os.path.exists("static/"+content[3]):
+        os.remove("static/"+content[3])
+    print ("vamos a borrar a ", id)
+    sqlite_contents.delete_content(id)
     flash("record deleted")
     return redirect("/admin/contents/showAll")
 
@@ -371,30 +517,91 @@ def admin_delete_content():
 #                         Users Contents
 #####################################################################    
 @app.route("/admin/users_contents/showAll")
-def show_all_users_contents_admin():
+@app.route("/admin/users_contents/showAll/<page>")
+def show_all_users_contents_admin(page=0):
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
-    users_contents=sqlite_users_contents.get_all_users_contents()
-    return render_template("admin/users_contents/showAll.html",users_contents=users_contents)
+            return redirect("/form_login")
+    page=int(page)
+    users_contents=sqlite_users_contents.get_all_users_contents(page*10)
+    total_pages=sqlite_users_contents.get_count_users_contents()
+    last_page=floor(total_pages/10)
+    return render_template("admin/users_contents/showAll.html",users_contents=users_contents, sqlite_users=sqlite_users, sqlite_contents=sqlite_contents, page=page, last_page=last_page)
 
 @app.route("/admin/users_contents/form_create")
 def admin_form_create_user_content():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
-    return render_template("admin/users_contents/form_create.html")
-@app.route("/admin/users_contents/delete", methods=["post"])
+            return redirect("/form_login")
+    # Le pasamos a la vista los usuarios y los contenidos
+    users=sqlite_users.get_all_users_without_page()
+    contents=sqlite_contents.get_all_contents_without_page()
+    return render_template("admin/users_contents/form_create.html", users=users, contents=contents)
 
+
+
+@app.route("/admin/users_contents/create", methods=["POST"])
+def admin_create_user_content():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+    if request.method!="POST":
+        return redirect("/form_login")
+    else:
+        #Obtenemos los datos
+        user_id = request.form.get("user_id")
+        content_id = request.form.get("content_id")
+       
+        #validaciones
+        if not user_id or not content_id:
+            flash("There can be no empty fields")
+            return redirect(url_for("admin_form_create_user_content"))
+        sqlite_users_contents.add_user_content(user_id, content_id)
+        return redirect(url_for("show_all_users_contents_admin"))
+    
+@app.route("/admin/users_contents/form_update", methods=["POST", "GET"])
+def admin_form_update_user_content():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+    if (request.method == "POST"):
+        id =request.form.get("id")
+    users_contents=sqlite_users_contents.get_user_content_by_field("id",id)
+    user_content=users_contents[0]
+    users=sqlite_users.get_all_users_without_page()
+    contents=sqlite_contents.get_all_contents_without_page()
+    return render_template("admin/users_contents/form_update.html",user_content=user_content, users=users, contents=contents, sqlite_users=sqlite_users, sqlite_contents=sqlite_contents)
+
+@app.route("/admin/users_contents/update", methods=["POST"])
+def admin_update_user_content():
+    if 'name' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+
+    if request.method!="POST":
+        return redirect("/form_login")
+  
+    #Obtenemos los datos
+    id = request.form.get("id")
+    user_id = request.form.get("user_id")
+    content_id = request.form.get("content_id")
+    if user_id==None or content_id==None:
+        flash("There can be no empty fields")
+        return redirect(url_for("show_all_users_contents_admin"))
+    sqlite_users_contents.update_user_content(id,user_id,content_id)
+    return redirect(url_for("show_all_users_contents_admin"))
+
+@app.route("/admin/users_contents/delete", methods=["POST"])
 def admin_delete_user_content():
     if 'name' not in session:
         if session["rol"] != "admin":
-            return redirect("/login")
+            return redirect("/form_login")
     id= request.form.get("id")
     print("El id a borrar es ",id)
     sqlite_users_contents.delete_user_content(id)
     flash("record deleted")
     return redirect("/admin/users_contents/showAll")
+
 
 
 
@@ -423,9 +630,8 @@ def admin_delete_user_content():
 @app.route("/users/settings")
 def show_settings_user():
     if 'name' not in session:
-        if session["rol"] != "normal":
-            flash("Log in as user")
-            return redirect("/login")
+        flash("Log in as user")
+        return redirect("/form_login")
     id=session["id"]
     users=sqlite_users.get_user_by_field("id", id)
     user=users[0]
@@ -434,11 +640,10 @@ def show_settings_user():
 @app.route("/users/settings_update", methods=["post"])
 def user_settings_update():
     if 'name' not in session:
-        if session["rol"] != "normal":
-            flash("Log in as user")
-            return redirect("/login")
+        flash("Log in as user")
+        return redirect("/form_login")
     if request.method!="POST":
-        return redirect("/login")
+        return redirect("/form_login")
     else:
         id = request.form.get("id")
         name = request.form.get("name")
@@ -461,9 +666,8 @@ def user_settings_update():
 @app.route("/users/add_user_content/<content_id>")
 def add_user_content(content_id):
     if 'name' not in session:
-        if session["rol"] != "normal":
-            flash("Log in as user")
-            return redirect("/login")
+        flash("Log in as user")
+        return redirect("/form_login")
     user_id=session["id"]   
     sqlite_users_contents.add_user_content(user_id,content_id )
     flash("Add to favorites")
@@ -472,9 +676,8 @@ def add_user_content(content_id):
 @app.route("/users/favorite_films")
 def show_favorite_films_user():
     if 'name' not in session:
-        if session["rol"] != "normal":
-            flash("Log in as user")
-            return redirect("/login")
+        flash("Log in as user")
+        return redirect("/form_login")
     id=session["id"]
     films=sqlite_users_contents.get_user_favorite_films(id)
     return render_template("users/favorite_films.html", films=films)
@@ -482,9 +685,8 @@ def show_favorite_films_user():
 @app.route("/users/favorite_series")
 def show_favorite_series_user():
     if 'name' not in session:
-        if session["rol"] != "normal":
-            flash("Log in as user")
-            return redirect("/login")
+        flash("Log in as user")
+        return redirect("/form_login")
     id=session["id"]
     series=sqlite_users_contents.get_user_favorite_series(id)
     print("las series favoritas son ", series)
@@ -494,9 +696,8 @@ def show_favorite_series_user():
 @app.route("/users/favorite_films_delete", methods=["post"])
 def favorite_film_delete():
     if 'name' not in session:
-        if session["rol"] != "normal":
-            flash("Log in as user")
-            return redirect("/login")
+        flash("Log in as user")
+        return redirect("/form_login")
     user_id=session["id"]
     content_id = request.form.get("content_id")
     sqlite_users_contents.delete_user_content_by_user_id_and_content_id(user_id, content_id)

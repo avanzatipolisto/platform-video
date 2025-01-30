@@ -4,27 +4,26 @@
     <div class="container">
         <div class="row">
             <div class="col-6 mx-auto p-5">
-                <h5 class="text-center">Admin create new user</h5>
-                <form action="/admin/users/create" method="post">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" name="name" class="form-control mb-2" {% if name %} value="{{name}}" {% endif %} required >
-                    <label for="password" class="form-label">clave</label>
-                    <input type="password" name="password" class="form-control mb-2" {% if password %} value="{{password}}" {% endif %} required>
-                    <label for="password_repeat" class="form-label">repeat the password</label>
-                    <input type="password" name="password_repeat" class="form-control mb-2" {% if password_repeat %} value="{{password_repeat}}" {% endif %} required>
-                    <label for="email" class="form-label">Email </label>
-                    <input type="email" name="email" class="form-control mb-2" {% if email %} value="{{email}}" {% endif %} required>
-                    <label for="birddate" class="form-label">Birddate </label>
-                    <input type="date" name="birddate" class="form-control mb-2" {% if birddate %} value="{{birddate}}" {% endif %} required>
-                    <label for="rol" class="form-label">Rol </label>
-                    <select name="rol" class="form-control mb-2" >
-                        <option value="normal" selected >Normal</option>
-                        <option value="admin">Admin</option>
+                <h5 class="text-center">Admin create new user content</h5>
+                <label for="type" class="form-label">Type </label>
+                <form action="/admin/users_contents/create" method="post">
+                    <select name="user_id" class="form-control mb-2" >
+                        {% for user in users %}
+                            <option value="{{user[0]}}" selected >{{user[1]}}</option>
+                        {% endfor %}
                     </select>
+                    <select name="content_id" class="form-control mb-2" >
+                        {% for content in contents %}
+                            <option value="{{content[0]}}" selected >{{content[3]}}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <!-- Los clicks son a través del API REST-->
                     <button type="submit" class="form-control mb-2 btn btn-primary">Create</button>
                 </form>
             </div>
         </div>
     </div>
 {% endblock %}
+
 

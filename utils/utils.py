@@ -1,6 +1,35 @@
 
 import datetime
 import re
+import unicodedata
+
+
+def format_filename(s, replacement="_"):
+    """
+    Corrige el string para que sea váido para el nombre de un archivo
+
+    Args:
+        String
+    
+    Return
+        String
+    """
+    # Normalizar el texto a forma NFKD y eliminar caracteres diacríticos
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    
+    # Reemplazar caracteres no válidos con el reemplazo especificado
+    s = re.sub(r'[\\/*?"<>|]', replacement, s)  # Caracteres inválidos en Windows
+    s = re.sub(r'[^\w.-]', replacement, s)  # Otros caracteres no alfanuméricos
+    
+    # Eliminar múltiples reemplazos consecutivos y limpiar bordes
+    s = re.sub(rf'{replacement}+', replacement, s).strip(replacement)
+    
+    # Asegurar que el nombre no esté vacío o sea solo puntos
+    return s if s and not all(c == '.' for c in s) else "default_filename"
+
+
+
 def formatear_fecha(cadena:datetime)->str:
     """
     Pone un fecha en este formato: dd/mm/aaaa
@@ -190,3 +219,5 @@ def generar_letrar_dni(dni_sin_letra):
     letra_posición=int(dni_sin_letra)%23
     letra=letras[letra_posición]
     return letra
+
+

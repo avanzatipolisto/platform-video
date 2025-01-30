@@ -8,8 +8,15 @@ class SqliteUsers:
         self.sqliteClient.cursor.execute(f"SELECT * FROM users WHERE {field}='{value}'")
         tupla=self.sqliteClient.cursor.fetchall()
         return tupla
-    def get_all_users(self):
-        self.sqliteClient.cursor.execute("SELECT * FROM users")
+    def get_count_users(self)->int:
+        self.sqliteClient.cursor.execute("SELECT count(*) FROM users ORDER BY name")      
+        count=self.sqliteClient.cursor.fetchall()[0][0]
+        return count
+    def get_all_users(self, page=0):
+        self.sqliteClient.cursor.execute("SELECT * FROM users LIMIT ?, 10", (page,))   
+        return self.sqliteClient.cursor.fetchall()
+    def get_all_users_without_page(self):
+        self.sqliteClient.cursor.execute("SELECT * FROM users")   
         return self.sqliteClient.cursor.fetchall()
     def add_user(self, name, password, email, birddate, rol):
         self.sqliteClient.cursor.execute("insert into users (name, password, email, birddate, rol) values (?, ?, ?, ?,?)", (name, password, email, birddate, rol))

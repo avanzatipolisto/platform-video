@@ -1,32 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Acerca{% endblock %}
+{% block title %} admin form update content{% endblock %}
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-6 mx-auto p-5">
-            <h5 class="text-center">Admin update user</h5>
-            <form action="/admin/users/update" method="post">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" name="name" class="form-control mb-2" {% if user[1] %} value="{{user[1]}}" {% endif %} required >
-                <label for="password" class="form-label">password</label>
-                <input type="password" name="password" class="form-control mb-2" {% if user[2] %} value="{{user[2]}}" {% endif %} required>
-                <label for="password_repeat" class="form-label">Password repeat</label>
-                <input type="password" name="password_repeat" class="form-control mb-2" {% if user[2] %} value="{{user[2]}}" {% endif %} required>
-                
-                <label for="email" class="form-label">Email </label>
-                <input type="email" name="email" id="email" class="form-control mb-2" {% if user[3] %} value="{{user[3]}}" {% endif %} required>
-                <label for="birddate" class="form-label">Birddate </label>
-                <input type="date" name="birddate" class="form-control mb-2" {% if user[4] %} value="{{user[4]}}" {% endif %} required>
-                <label for="roll" class="form-label">Roll </label>
-                <select name="rol" required>
-                    <option {% if user[5] %} value="{{user[5]}}" {% endif %} selected>{{user[5]}}</option>
-                </select>
-                
-                <input type="hidden" name="id" value="{{user[0]}}" >
-                <button type="submit" class="form-control mb-2 btn btn-primary">Update</button>
-            </form>
-        </div>
+    <div class="container">
+        <form action="/admin/contents/update" method="post" enctype="multipart/form-data">
+            <div class="row">
+                    <div class='col m-6'>
+                        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#change-image">
+                            <img class="img-fluid" name="imageFile" id="imageFile" src="{{ url_for('static', filename=content[5]) }}" alt="{{ content[3] }}" style="max-height: 500px;" />
+                        </button>
+                        <input type="hidden" name="path_image" value="{{ content[5] }}">
+                        <div id="divImage">{{content[5]}}</div>
+                    </div>
+                    <div class='col m-6 align-self-center'>
+                        <h5 class="text-center">Admin update content</h5>      
+                        <label for="type" class="form-label">Type </label>
+                        <select name="type" class="form-control mb-2" >
+                            {% if content[1] == "film" %}
+                                <option value="film" selected>Film</option>
+                                <option value="serie">Serie</option>
+                            {% elif content[1] == "serie" %}
+                                <option value="film" >Film</option>
+                                <option value="serie" selected>Serie</option>
+                            {% endif %}
+                        </select>
+
+                        <label for="genre" class="form-label">Genre</label>
+                        <input type="text" name="genre" class="form-control mb-2" {% if content[2] %} value="{{content[2]}}" {% endif %} required >
+
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control mb-2" {% if content[3] %} value="{{content[3]}}" {% endif %} disabled>
+
+                        <label for="year" class="form-label">Year</label>
+                        <input type="number" name="year" class="form-control mb-2" {% if content[4] %} value="{{content[4]}}" {% endif %} required>
+
+                        <label for="clicks" class="form-label">Clicks</label>
+                        <input type="text" name="clicks" class="form-control mb-2" {% if content[6]!=None %}  value="{{content[6]}}" {% endif %} required>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class='col m-12 align-self-center'></div>>
+                        <input type="hidden" name="title" value="{{ content[3] }}" >
+                        <input type="hidden" name="id" value="{{ content[0] }}">
+                        <button type="submit" class="form-control mb-2 btn btn-primary">Update</button>
+                        <a href="/admin/contents/showAll" class="form-control mb-2 btn btn-danger">Cancel</a>
+                    </div>
+                </div>
+            <!-- Modal -->
+            <div class="modal fade" id="change-image" tabindex="-1" aria-labelledby="change-image" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="change-image">Change Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Si el usuario cambia la imagen, el input file dejará de ser nulo-->
+                        <!--<input type="file" name="image" id="image" class="form-control mb-2" onChange=readImage(this) data-bs-dismiss="modal">-->
+                        <input type="file" name="image" id="image" class="form-control mb-2"  data-bs-dismiss="modal">
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </form> 
     </div>
-</div>   
 {% endblock %}
+
 
