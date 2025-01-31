@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, make_response, redirect, url_for, flash, session,jsonify
+from flask import Flask, render_template, request, make_response, redirect, url_for, flash, session
 from utils.utils import *
 from data.sqliteClient import SqliteClient
 from data.sqliteUsers import SqliteUsers
@@ -8,7 +8,6 @@ from math import floor
 from utils.file_manager import *
 # https://github.com/flasgger/flasgger
 from flasgger import Swagger
-
 #Utilizamos el os en el delete content
 import os
 database=SqliteClient()
@@ -41,6 +40,8 @@ def home(page_films=0, page_series=0):
     """
     Ver las peículas y series con más clicks
     ---    
+    tags:
+      - general
     parameters:
       - name: page_films
         in: path
@@ -65,7 +66,9 @@ def home(page_films=0, page_series=0):
 def show(id):
     """
     Ver ficha de una película o serie
-    ---    
+    ---
+    tags:
+      - general    
     parameters:
       - name: id
         in: path
@@ -85,7 +88,9 @@ def show(id):
 def show_user_content():
     """
     Ver ficha de una película o serie a través del método POST o GET
-    ---    
+    --- 
+    tags:
+      - general   
     parameters:
       - name: id
         in: formData
@@ -114,7 +119,9 @@ def show_user_content():
 def films(letter=None,page=None):
     """
     Ver películas paginadas por letra 
-    ---    
+    ---
+    tags:
+      - general      
     parameters:
       - name: letter
         in: path
@@ -154,7 +161,9 @@ def films(letter=None,page=None):
 def series(letter=None,page=None):
     """
     Ver series paginadas por letra 
-    ---    
+    ---  
+    tags:
+      - general        
     parameters:
       - name: letter
         in: path
@@ -194,7 +203,8 @@ def contact():
     """
     Ver información de contacto
     ---    
-    
+    tags:
+      - general      
     responses:
         200:
             description: films.html
@@ -207,7 +217,9 @@ def contact():
 def search():
     """
     Muestra una lista de películas que coincidan con la búsqueda
-    ---    
+    --- 
+    tags:
+      - general         
     parameters:
       - name: title
         in: formData
@@ -260,7 +272,8 @@ def form_login():
     """
     Muestra un formaulario de login
     ---    
-    
+    tags:
+      - auth      
     responses:
         200:
             description: form_login.html
@@ -274,7 +287,8 @@ def login():
     """
     Contiene la logica de login
     ---
-
+    tags:
+      - auth     
     parameters:
       - name: name_user
         in: formData
@@ -462,7 +476,9 @@ def admin_reset_all():
 def show_all_user_admin(page=0):
     """
     Muestra todos los usuarios paginados
-    ---    
+    ---
+    tags:
+      - users         
     parameters:
       - name: page
         in: path
@@ -490,7 +506,8 @@ def admin_form_create_user():
     """
     Muestra el formulario para crear un usuario
     ---    
-
+    tags:
+      - auth     
 
     responses:
         200:
@@ -507,7 +524,9 @@ def admin_form_create_user():
 def admin_create_user():
     """
     crea un usuario
-    ---    
+    --- 
+    tags:
+      - auth        
     parameters:
       - name: name
         in: formData
