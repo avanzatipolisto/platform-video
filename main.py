@@ -6,6 +6,7 @@ from data.sqliteContents import SqliteContents
 from data.sqliteUsersContents import SqliteUsersContents
 from math import floor
 from utils.file_manager import *
+# https://github.com/flasgger/flasgger
 from flasgger import Swagger
 
 #Utilizamos el os en el delete content
@@ -79,8 +80,25 @@ def show(id):
     contents=sqlite_contents.get_content_by_field("id", id)
     content=contents[0]
     return render_template("show.html", content=content)
+
 @app.route("/show_content", methods = ["POST", "GET"])
 def show_user_content():
+    """
+    Ver ficha de una película o serie a través del método POST o GET
+    ---    
+    parameters:
+      - name: id
+        in: formData
+        type: integer
+        required: true
+
+
+    responses:
+        200:
+            description: show.html
+        405:
+            description: Invalid input
+    """
     if request.method=="GET":
         id=request.args.get("id")
     elif request.method=="POST":
@@ -94,6 +112,24 @@ def show_user_content():
 @app.route("/films/<page>")
 @app.route("/films/<letter>/<page>")
 def films(letter=None,page=None):
+    """
+    Ver películas paginadas por letra 
+    ---    
+    parameters:
+      - name: letter
+        in: path
+        type: integer
+      - name: page
+        in: path
+        type: integer
+
+
+    responses:
+        200:
+            description: films.html
+        405:
+            description: Invalid input
+    """
     if page==None:
         page=0
     else:
@@ -116,6 +152,24 @@ def films(letter=None,page=None):
 @app.route("/series/<page>")
 @app.route("/series/<letter>/<page>")
 def series(letter=None,page=None):
+    """
+    Ver series paginadas por letra 
+    ---    
+    parameters:
+      - name: letter
+        in: path
+        type: integer
+
+      - name: page
+        in: path
+        type: integer
+
+    responses:
+        200:
+            description: series.html
+        405:
+            description: Invalid input
+    """
     if page==None:
         page=0
     else:
@@ -137,10 +191,35 @@ def series(letter=None,page=None):
 
 @app.route("/contact")
 def contact():
+    """
+    Ver información de contacto
+    ---    
+    
+    responses:
+        200:
+            description: films.html
+        405:
+            description: Invalid input
+    """
     return render_template("contact.html")
 
 @app.route("/search", methods = ["POST"])
 def search():
+    """
+    Muestra una lista de películas que coincidan con la búsqueda
+    ---    
+    parameters:
+      - name: title
+        in: formData
+        type: integer
+        required: true
+
+    responses:
+        200:
+            description: search.html
+        405:
+            description: Invalid input
+    """
     if request.method == "POST":
         text_search = request.form.get("search")
         if check_empty(text_search):
@@ -180,6 +259,13 @@ def search():
 def form_login():
     """
     Muestra un formaulario de login
+    ---    
+    
+    responses:
+        200:
+            description: form_login.html
+        405:
+            description: Invalid input
     """
     return render_template("auth/form_login.html")
 
@@ -187,6 +273,23 @@ def form_login():
 def login():
     """
     Contiene la logica de login
+    ---
+
+    parameters:
+      - name: name_user
+        in: formData
+        type: string
+        required: true
+
+      - name: password
+        in: formData
+        type: string
+        required: true
+    responses:
+        200:
+            description: home.html
+        405:
+            description: Invalid input
     """
     if request.method != "POST":
         flash("Not allowed")
@@ -357,6 +460,22 @@ def admin_reset_all():
 @app.route("/admin/users/showAll")
 @app.route("/admin/users/showAll/<page>")
 def show_all_user_admin(page=0):
+    """
+    Muestra todos los usuarios paginados
+    ---    
+    parameters:
+      - name: page
+        in: path
+        type: integer
+        required: false
+
+
+    responses:
+        200:
+            description: admin/users/showAll.html
+        405:
+            description: Invalid input
+    """
     if 'name' not in session:
         if session["rol"] != "admin":
             return redirect("/form_login")
@@ -368,6 +487,17 @@ def show_all_user_admin(page=0):
 
 @app.route("/admin/users/form_create")
 def admin_form_create_user():
+    """
+    Muestra el formulario para crear un usuario
+    ---    
+
+
+    responses:
+        200:
+            description: admin/users/form_create.html
+        405:
+            description: Invalid input
+    """
     if 'name' not in session:
         if session["rol"] != "admin":
             return redirect("/form_login")
@@ -375,6 +505,46 @@ def admin_form_create_user():
 
 @app.route("/admin/users/create", methods=["POST"])
 def admin_create_user():
+    """
+    crea un usuario
+    ---    
+    parameters:
+      - name: name
+        in: formData
+        type: string
+        required: true
+
+      - name: email
+        in: formData
+        type: string
+        required: true
+
+      - name: password
+        in: formData
+        type: string
+        required: true
+
+      - name: password_repeat
+        in: formData
+        type: string
+        required: true
+
+      - name: birddate
+        in: formData
+        type: string
+        required: true
+
+      - name: rol
+        in: formData
+        type: string
+        required: true
+
+    responses:
+        200:
+            description: /admin/users/showAll
+        405:
+            description: Invalid input
+    """
     if 'name' not in session:
         if session["rol"] != "admin":
             return redirect("/form_login")
