@@ -76,13 +76,19 @@ class SqliteContents:
         self.sqliteClient.cursor.execute("insert into contents (type, genre, title, year, image, clicks) values (?, ?, ?, ?, ?, ?)", (type, genre, title, year, image, clicks))
         self.sqliteClient.connection.commit()
     def update_content(self, id, type, genre, title, year, image, clicks):
-        print("vamos a actualizar: ",id, type, genre, title, year, image, clicks)
+        # Necesario para borrar o actualizar en cascada
+        self.sqliteClient.cursor.execute("PRAGMA foreign_keys=ON")
+        #print("vamos a actualizar: ",id, type, genre, title, year, image, clicks)
         self.sqliteClient.cursor.execute(f"update contents set type='{type}', genre ='{genre}', title='{title}', year='{year}', image='{image}', clicks='{clicks}' where id = '{id}'")
         self.sqliteClient.connection.commit()
     def delete_content(self, id):
+        # Necesario para borrar o actualizar en cascada
+        self.sqliteClient.cursor.execute("PRAGMA foreign_keys=ON")
         self.sqliteClient.cursor.execute(f"delete from contents where id = '{id}'")
         self.sqliteClient.connection.commit()
     def delete_all_contents(self):
+        # Necesario para borrar o actualizar en cascada
+        self.sqliteClient.cursor.execute("PRAGMA foreign_keys=ON")
         self.sqliteClient.cursor.execute(f"delete from contents")
         self.sqliteClient.connection.commit()
         

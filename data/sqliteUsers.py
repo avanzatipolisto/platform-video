@@ -22,12 +22,18 @@ class SqliteUsers:
         self.sqliteClient.cursor.execute("insert into users (name, password, email, birddate, rol) values (?, ?, ?, ?,?)", (name, password, email, birddate, rol))
         self.sqliteClient.connection.commit()
     def update_user(self, id, name, password, email, birdate, rol):
+        # Necesario para borrar o actualizar en cascada
+        self.sqliteClient.cursor.execute("PRAGMA foreign_keys=ON")
         self.sqliteClient.cursor.execute(f"update users set name='{name}',password ='{password}', email='{email}', birddate='{birdate}', rol='{rol}'  where id = '{id}'")
         self.sqliteClient.connection.commit()
     def delete_user(self, id):
+        # Necesario para borrar o actualizar en cascada
+        self.sqliteClient.cursor.execute("PRAGMA foreign_keys=ON")
         self.sqliteClient.cursor.execute(f"delete from users where id = '{id}'")
         self.sqliteClient.connection.commit()
     def delete_all_users(self):
+        # Necesario para borrar o actualizar en cascada
+        self.sqliteClient.cursor.execute("PRAGMA foreign_keys=ON")
         self.sqliteClient.cursor.execute(f"delete from users")
         self.sqliteClient.connection.commit()
     

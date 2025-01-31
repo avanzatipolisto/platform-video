@@ -63,7 +63,7 @@ def home(page_films=0, page_series=0):
 @app.route("/show/<id>")
 def show(id):
     """
-    Ver ficha de una película
+    Ver ficha de una película o serie
     ---    
     parameters:
       - name: id
@@ -287,8 +287,55 @@ def menu_admin():
 #####################################################################
 
 @app.route("/admin/settings/form_reset")
-def admin_form_reset_all():
+def admin_form_settings():
     return render_template("admin/settings.html")
+@app.route("/admin/csv_create_backup")
+def adm_csv_crear_backup():
+    if 'nombre' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+    users=sqlite_users.get_all_users_without_page()
+    contents=sqlite_contents.get_all_contents_without_page()
+    users_contents=sqlite_users_contents.get_all_users_contents_without_page()
+
+    write_csv_file(users, contents, users_contents)
+    flash("File created successfully")
+    return redirect(url_for("admin_form_settings"))
+
+@app.route("/admin/csv_restore_backup", methods=["POST"])
+def adm_csv_leer():
+    if 'nombre' not in session:
+        if session["rol"] != "admin":
+            return redirect("/form_login")
+    file=request.files["file_csv"] 
+    file_name=file.filename
+    file.save(file_name) 
+    if (file_name.split(".")[-1] != "csv"):
+        flash("The file must be of type csv")
+        return redirect(url_for("admin_form_settings"))
+    if (file==None):
+        flash("LEl archivo no puede estar vacío")
+        return redirect(url_for("admin_form_settings"))
+    #obtenemos un diccionario con los usuarios, deportes, deportes_usuarios y días_prohibidos
+    datos=restore_csv_backup(file_name)    
+    users=datos["users"]
+    if(len(users)!=0):
+        sqlite_users.delete_all_users()
+        for user in users:
+            sqlite_users.add_user(user[1],user[2],user[3],user[4],user[5])
+    contents=datos["contents"]
+    if (len(contents)!=0):
+        sqlite_contents.delete_all_contents()
+    for content in contents:
+        sqlite_contents.add_content(content[1],content[2],content[3],content[4],content[5],content[6])
+    users_contents=datos["users_contents"]
+    if( users_contents!=0):
+        sqlite_users_contents.delete_all_users_contents()
+        for user_content in users_contents:
+            sqlite_users_contents.add_user_content(user_content[1],user_content[2])
+    
+    flash("File csv read successfully")
+    return redirect(url_for("admin_form_settings"))
 
 @app.route("/admin/settings/reset")
 def admin_reset_all():
@@ -300,10 +347,8 @@ def admin_reset_all():
     delete_folder(app.config["FILMS_IMAGES_FOLDER"])
     delete_folder(app.config["SERIES_IMAGES_FOLDER"])
     copy_assets("assets", "static")
-    database.close()
+    database.get_connect().close()
     delete_file("database.db")
-    database.connect()
-    database.close()
     return redirect(url_for("home")) 
 
  
@@ -743,6 +788,6 @@ def favorite_film_delete():
 
 # es posible arranca la aplicación esccribiendo en el terminal flask --app main run y comentando las 2 siguiente sentencias
 if __name__=="__main__":
-    #app.run(debug=True)
+    app.run(debug=True)
     #para render.com
-    app.run(host="0.0.0.0", debug=False)
+    #app.run(host="0.0.0.0", debug=False)

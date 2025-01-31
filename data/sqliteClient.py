@@ -7,7 +7,8 @@ class SqliteClient:
         self.connection=None
         self.cursor=None
         self.SQLITE_DB="database.db"
-
+    def get_connect(self):
+        return self.connection
     def connect(self):
         incializar_bd=False
         if not os.path.exists(self.SQLITE_DB):
@@ -15,9 +16,6 @@ class SqliteClient:
         try:
             self.connection=sqlite3.connect(self.SQLITE_DB, check_same_thread=False)
             self.cursor=self.connection.cursor()
-            self.cursor.execute("PRAGMA foreign_keys=ON");
-            self.connection.commit()
-
 
         except Exception as e:
             print("Exception: ", e)
@@ -28,7 +26,7 @@ class SqliteClient:
             self.add_fake_users()
             self.add_fake_contents()
             self.add_fake_users_contents()
-            self.copy_assets("assets", "static")
+            copy_assets("assets", "static")
     def close(self):
         if self.connection!=None:
             self.connection.close()

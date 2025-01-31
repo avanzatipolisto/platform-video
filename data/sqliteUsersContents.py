@@ -11,6 +11,9 @@ class SqliteUsersContents:
     def get_all_users_contents(self, page):
         self.sqliteClient.cursor.execute("SELECT * FROM users_contents LIMIT ?, 10", (page,))  
         return self.sqliteClient.cursor.fetchall()
+    def get_all_users_contents_without_page(self):
+        self.sqliteClient.cursor.execute("SELECT * FROM users_contents ")  
+        return self.sqliteClient.cursor.fetchall()
     def get_count_users_contents(self)->int:
         self.sqliteClient.cursor.execute("SELECT count(*) FROM users_contents")      
         count=self.sqliteClient.cursor.fetchall()[0][0]
@@ -43,7 +46,7 @@ class SqliteUsersContents:
         self.sqliteClient.cursor.execute(f"delete from users_contents where id = '{id}'")
         self.sqliteClient.connection.commit()
     def delete_user_content_by_user_id_and_content_id(self, user_id, content_id):
-        print("borrado el usersids ", user_id, "content id ", content_id)
+        #print("borrado el usersids ", user_id, "content id ", content_id)
         self.sqliteClient.cursor.execute(f"delete from users_contents where user_id = '{user_id}' and content_id = '{content_id}' ")
         self.sqliteClient.connection.commit()
     def delete_all_users_contents(self):
